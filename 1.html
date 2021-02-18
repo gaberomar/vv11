@@ -1,60 +1,77 @@
 
+<html>
+<head>
 
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dplayer@1.25.0/dist/DPlayer.min.css">
+<script src="https://cdn.jsdelivr.net/npm/cdnbye@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/dplayer@1.25.0"></script>
 
-<meta name="referrer" content="no-referrer">
-<script type="text/javascript" src="https://cdn.pr.trt.com.tr/static/js/player/player.1.0.165.js"></script>
-<script> 
+<script src="//cdn.dashjs.org/latest/dash.all.debug.js"></script>
+<script src="https://unpkg.com/videojs-contrib-dash/dist/videojs-dash.js"></script>
+<script>
 function getParam ( sname )
 {
- var params = location.search.substr(location.search.indexOf("?")+1);
- var sval =  params.replace("sv=", "");
- return sval;
+  var params = location.search.substr(location.search.indexOf("?")+1);
+  var sval =  params.replace("sv=", "");
+  
+  return sval;
 }
 var sv = getParam("sv");
-</script>
-<body onload="init()">
 
-<div id="player" style="background-color: #000;"></div>
+</script>
+ </head>
+<body style="margin:0;background:#000;">
+<div id="iframeDiv" style="width: 100%;"> 
+<body onload="init()">
+<div id="dplayer"></div>
 
 <script>
-    (function(){
-        window.hola_player({
-            player: "#player",
-            auto_play: true,
-            dvr: false,
-            muted: false,
-            controls: true,
-            share: false,
-            settings: true,
-           width: "100%",
-            height: "100%",
-           sources: [{
-                src: sv,
-                type: 'application/x-mpegurl'
-            }],
-        });
-    player.vjs.on('error', function() {
-                                    $.ajax({
-                                        url: "https://geoip-db.com/jsonp",
-                                        jsonpCallback: "callback",
-                                        dataType: "jsonp",
-                                        success: function( location ) {
-                                            if(location.country_code != 'TR'){
-                                                var modal = player.vjs.createModal('Uluslararası müsabakalardaki telif kısıtlamaları nedeniyle Türkiye sınırları dışında izlenememektedir.');
-                                                modal.addClass('vjs-my-fancy-modal');
-                                            }
-                                        }
-                                    });
-                                    //var error = player.vjs.error();
-                                });
+    var _peerId = '', _peerNum = 0, _totalP2PDownloaded = 0, _totalP2PUploaded = 0;
+    var type = 'normal';
+    if(Hls.isSupported() && Hls.WEBRTC_SUPPORT) {
+        type = 'customHls';
+    }
+    const dp = new DPlayer({
+        container: document.getElementById('dplayer'),
+        autoplay: true,
+        video: {
+            url: sv,
+            type: type,
+            customType: {
+                'customHls': function (video, player) {
+                    const hls = new Hls({
+                        debug: false,
+                        // Other hlsjsConfig options provided by hls.js
+                        p2pConfig: {
+                            logLevel: 'debug',
+                            live: false,        // set as true in live mode
+                            // Other p2pConfig options provided by CDNBye
+                        }
+                    });
+                    hls.loadSource(video.src);
+                    hls.attachMedia(video);
+                    hls.p2pEngine.on('stats', function (stats) {
+                        _totalP2PDownloaded = stats.totalP2PDownloaded;
+                        _totalP2PUploaded = stats.totalP2PUploaded;
+                        updateStats();
+                    }).on('peerId', function (peerId) {
+                        _peerId = peerId;
+                    }).on('peers', function (peers) {
+                        _peerNum = peers.length;
+                        updateStats();
+                    });
+                }
+            }
+        }
+    });
 
-                
-                  })();
+    function updateStats() {
+        var text = 'P2P have downloaded' + (_totalP2PDownloaded/1024).toFixed(2)
+            + 'MB shared ' + (_totalP2PUploaded/1024).toFixed(2) + 'MB' + ' connected ' + _peerNum + ' peers';
+        document.getElementById('stats').innerText = text
+    }
+</script>
+ 
 
-
-       </script>
 </body>
-<span style='position:absolute; bottom: 35px!important; left: 10px!important; max-bottom: 10px!important; max-width: 170%!important; width: 22%!important; font-size: 13px; font-weight: bold;color: #ff0;'>
-<img style= 'left: 10px!important; max-height: 50px!important; max-width: 100%!important; width: 90%!important;' src='http://1.bp.blogspot.com/-6Utq5JU_l2w/YCAo8gB0x7I/AAAAAAAALZU/YJxOQHkvIywpU4znsCgYEvIsc-U8ijY1wCK4BGAYYCw/s1600/2.png'></span>
-
-
+</html>
