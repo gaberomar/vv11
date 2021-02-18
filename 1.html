@@ -1,0 +1,65 @@
+
+
+
+<meta name="referrer" content="no-referrer">
+<script type="text/javascript" src="https://cdn.pr.trt.com.tr/static/js/player/player.1.0.165.js"></script>
+<script> 
+function getParam ( sname )
+{
+ var params = location.search.substr(location.search.indexOf("?")+1);
+ var sval =  params.replace("sv=", "");
+ return sval;
+}
+var sv = getParam("sv");
+</script>
+<body onload="init()">
+
+<div id="player" style="background-color: #000;"></div>
+
+<script>
+
+   var currTime = new Date().getTime();
+                            var currUrl = window.location.href;
+    (function(){
+        window.hola_player({
+            
+            player: "#player",
+            auto_play: true,
+            dvr: false,
+            muted: false,
+            controls: true,
+            share: false,
+            settings: true,
+           width: "100%",
+            height: "100%",
+           sources: [{
+                src: sv,
+                type: 'application/x-mpegurl'
+            }],
+        });
+    player.vjs.on('error', function() {
+                                    $.ajax({
+                                        url: "https://geoip-db.com/jsonp",
+                                        jsonpCallback: "callback",
+                                        dataType: "jsonp",
+                                        success: function( location ) {
+                                            if(location.country_code != 'TR'){
+                                                var modal = player.vjs.createModal('Uluslararası müsabakalardaki telif kısıtlamaları nedeniyle Türkiye sınırları dışında izlenememektedir.');
+                                                modal.addClass('vjs-my-fancy-modal');
+                                            }
+                                        }
+                                    });
+                                    //var error = player.vjs.error();
+                                });
+
+                
+                  })();
+
+
+       </script>
+
+</body>
+<span style='position:absolute; bottom: 35px!important; left: 10px!important; max-bottom: 10px!important; max-width: 170%!important; width: 22%!important; font-size: 13px; font-weight: bold;color: #ff0;'>
+<img style= 'left: 10px!important; max-height: 50px!important; max-width: 100%!important; width: 90%!important;' src='http://1.bp.blogspot.com/-6Utq5JU_l2w/YCAo8gB0x7I/AAAAAAAALZU/YJxOQHkvIywpU4znsCgYEvIsc-U8ijY1wCK4BGAYYCw/s1600/2.png'></span>
+
+
